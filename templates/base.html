@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Multi-Agent AI Medical Diagnostics{% endblock %}</title>
+    
+    <!-- Meta tags for better SEO -->
+    <meta name="description" content="Advanced AI-powered medical diagnostics with specialized agents for cardiology, psychology, pulmonology, and general medicine.">
+    <meta name="keywords" content="AI medical diagnostics, medical analysis, healthcare AI, medical assistant">
+    
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- System Fonts - More Natural -->
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/style.css') }}?v=20250820235900" rel="stylesheet">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩺</text></svg>">
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <!-- Enhanced Navigation -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold fs-4" href="{{ url_for('home') }}">
+                <span class="brand-icon me-2">🩺</span>
+                <span class="brand-text">MedicalAI</span>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'home' %}active{% endif %}" href="{{ url_for('home') }}">
+                            <i class="bi bi-house-door me-1"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'analysis_page' %}active{% endif %}" href="{{ url_for('analysis_page') }}">
+                            <i class="bi bi-clipboard2-pulse me-1"></i> Analysis
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'chat_page' %}active{% endif %}" href="{{ url_for('chat_page') }}">
+                            <i class="bi bi-chat-dots me-1"></i> Chat
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'history_page' %}active{% endif %}" href="{{ url_for('history_page') }}">
+                            <i class="bi bi-clock-history me-1"></i> History
+                        </a>
+                    </li>
+                    <li class="nav-item ms-2">
+                        <div class="nav-status-indicator">
+                            <span class="status-dot" id="systemStatus" title="System Status"></span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Spacer for fixed navbar -->
+    <div class="navbar-spacer"></div>
+
+    <!-- Main Content -->
+    <main class="container my-4 flex-grow-1">
+        <!-- Toast Notification Container -->
+        <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1060;"></div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show modern-alert" role="alert">
+                        <div class="d-flex align-items-center">
+                            {% if category == 'success' %}
+                                <i class="bi bi-check-circle-fill me-2 text-success"></i>
+                            {% elif category == 'error' %}
+                                <i class="bi bi-exclamation-triangle-fill me-2 text-danger"></i>
+                            {% elif category == 'warning' %}
+                                <i class="bi bi-exclamation-circle-fill me-2 text-warning"></i>
+                            {% else %}
+                                <i class="bi bi-info-circle-fill me-2 text-info"></i>
+                            {% endif %}
+                            <div>{{ message }}</div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Enhanced Footer -->
+    <footer class="footer mt-auto py-4">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center text-muted">
+                        <i class="bi bi-shield-check me-2 text-primary"></i>
+                        <span class="small">
+                            <strong>Medical Disclaimer:</strong> For educational purposes only. 
+                            Always consult healthcare professionals.
+                        </span>
+                    </div>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <div class="d-flex align-items-center justify-content-md-end mt-3 mt-md-0">
+                        <span class="small text-muted me-3">Powered by AI Technology</span>
+                        <div class="d-flex gap-2">
+                            <span class="badge bg-primary">Gemini AI</span>
+                            <span class="badge bg-success">Multi-Agent</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+	    <div class="text-center mt-3">
+    		<small class="text-muted">
+        	Made with ❤️ by <strong>Ajay Tiwari</strong>
+    		</small>
+	    </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/app.js') }}?v=20250820235900"></script>
+    
+    <!-- Enhanced App Functionality -->
+    <script>
+        // Initialize app on load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeEnhancedUI();
+            checkSystemStatus();
+            initializeAnimations();
+        });
+        
+        // Enhanced UI initialization
+        function initializeEnhancedUI() {
+            // Add smooth scrolling to all anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
+            
+            // Add loading states to buttons
+            document.querySelectorAll('form').forEach(form => {
+                form.addEventListener('submit', function() {
+                    const submitButton = form.querySelector('button[type="submit"]');
+                    if (submitButton) {
+                        submitButton.classList.add('loading');
+                        submitButton.disabled = true;
+                    }
+                });
+            });
+        }
+        
+        // Check system status and update indicator
+        async function checkSystemStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const status = await response.json();
+                const statusDot = document.getElementById('systemStatus');
+                
+                if (statusDot) {
+                    if (status.gemini_configured && status.agents_ready) {
+                        statusDot.className = 'status-dot status-online';
+                        statusDot.title = 'All systems operational';
+                    } else {
+                        statusDot.className = 'status-dot status-offline';
+                        statusDot.title = 'System setup required';
+                    }
+                }
+            } catch (error) {
+                console.warn('Could not check system status:', error);
+            }
+        }
+        
+        // Simple animations
+        function initializeAnimations() {
+            // Simple fade in for cards
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                card.style.opacity = '1';
+            });
+        }
+        
+        // Toast notification function
+        function showToast(message, type = 'info') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toastId = 'toast-' + Date.now();
+            
+            const toastHTML = `
+                <div id="${toastId}" class="toast align-items-center text-white bg-${type} border-0" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">${message}</div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+            
+            toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+            const toastElement = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
+            
+            // Remove from DOM after hiding
+            toastElement.addEventListener('hidden.bs.toast', () => {
+                toastElement.remove();
+            });
+        }
+        
+        // Make toast function globally available
+        window.showToast = showToast;
+        
+        // Check status every 30 seconds
+        setInterval(checkSystemStatus, 30000);
+    </script>
+    
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

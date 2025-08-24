@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis History - AI Medical Diagnostics{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="bi bi-clock-history"></i> Multi-Agent Diagnosis History
+        </h1>
+        <p class="lead text-muted">Track your analysis history and specialist consultations</p>
+    </div>
+</div>
+
+{% if history %}
+<!-- Summary Statistics -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-clipboard-data text-primary fs-1"></i>
+                <h5 class="mt-2">{{ stats.total_analyses }}</h5>
+                <p class="text-muted small mb-0">Total Analyses</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-calendar-month text-success fs-1"></i>
+                <h5 class="mt-2">{{ stats.this_month }}</h5>
+                <p class="text-muted small mb-0">This Month</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-calendar-check text-info fs-1"></i>
+                <h5 class="mt-2">{{ stats.last_analysis or 'N/A' }}</h5>
+                <p class="text-muted small mb-0">Last Analysis</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <button class="btn btn-outline-primary btn-sm" onclick="exportHistory()">
+                        <i class="bi bi-download"></i> Export
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm" onclick="clearHistory()">
+                        <i class="bi bi-trash"></i> Clear
+                    </button>
+                </div>
+                <p class="text-muted small mb-0 mt-2">Actions</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Agent Usage Statistics -->
+{% if stats.agent_usage %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-robot"></i> AI Specialist Usage</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for agent, count in stats.agent_usage.items() %}
+                    <div class="col-md-3 mb-3">
+                        <div class="text-center">
+                            {% if 'Cardiology' in agent %}
+                                <span class="fs-1">🫀</span>
+                            {% elif 'Psychology' in agent %}
+                                <span class="fs-1">🧠</span>
+                            {% elif 'Pulmonology' in agent %}
+                                <span class="fs-1">🫁</span>
+                            {% else %}
+                                <span class="fs-1">🩺</span>
+                            {% endif %}
+                            <h6 class="mt-2">{{ agent }}</h6>
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" 
+                                     style="width: {{ (count / stats.total_analyses * 100) if stats.total_analyses > 0 else 0 }}%">
+                                    {{ count }} cases
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Analysis History -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-list-ul"></i> Analysis History</h5>
+            </div>
+            <div class="card-body">
+                <div class="accordion" id="historyAccordion">
+                    {% for entry in history %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading{{ loop.index }}">
+                            <button class="accordion-button collapsed" type="button" 
+                                    data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}">
+                                {% if 'Cardiology' in entry.primary_agent %}
+                                    🫀
+                                {% elif 'Psychology' in entry.primary_agent %}
+                                    🧠
+                                {% elif 'Pulmonology' in entry.primary_agent %}
+                                    🫁
+                                {% else %}
+                                    🩺
+                                {% endif %}
+                                Analysis {{ loop.index }} - {{ entry.timestamp[:19] | replace('T', ' ') }}
+                                <span class="badge bg-primary ms-2">{{ entry.primary_agent }}</span>
+                                {% if entry.agent_confidence %}
+                                    <span class="badge bg-success ms-1">{{ (entry.agent_confidence * 100) | round }}% confidence</span>
+                                {% endif %}
+                            </button>
+                        </h2>
+                        <div id="collapse{{ loop.index }}" class="accordion-collapse collapse" 
+                             data-bs-parent="#historyAccordion">
+                            <div class="accordion-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <h6><i class="bi bi-file-earmark-text"></i> Report Summary:</h6>
+                                        <p class="small">{{ entry.report_text }}</p>
+                                        
+                                        {% if entry.symptoms %}
+                                        <h6><i class="bi bi-thermometer"></i> Symptoms:</h6>
+                                        <p class="small">{{ entry.symptoms }}</p>
+                                        {% endif %}
+                                        
+                                        {% if entry.medical_history %}
+                                        <h6><i class="bi bi-clock-history"></i> Medical History:</h6>
+                                        <p class="small">{{ entry.medical_history }}</p>
+                                        {% endif %}
+                                        
+                                        <h6><i class="bi bi-robot"></i> Primary Specialist:</h6>
+                                        <p class="small">
+                                            {% if 'Cardiology' in entry.primary_agent %}
+                                                🫀
+                                            {% elif 'Psychology' in entry.primary_agent %}
+                                                🧠
+                                            {% elif 'Pulmonology' in entry.primary_agent %}
+                                                🫁
+                                            {% else %}
+                                                🩺
+                                            {% endif %}
+                                            {{ entry.primary_agent }}
+                                        </p>
+                                        
+                                        {% if entry.agent_confidence %}
+                                        <h6><i class="bi bi-speedometer"></i> Confidence Score:</h6>
+                                        <div class="progress mb-2">
+                                            <div class="progress-bar" role="progressbar" 
+                                                 style="width: {{ entry.agent_confidence * 100 }}%">
+                                                {{ (entry.agent_confidence * 100) | round }}%
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        {% if entry.secondary_agents %}
+                                        <h6><i class="bi bi-people"></i> Additional Consultations:</h6>
+                                        <ul class="small">
+                                            {% for agent in entry.secondary_agents %}
+                                            <li>{{ agent }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="col-md-8">
+                                        <h6>
+                                            {% if 'Cardiology' in entry.primary_agent %}
+                                                🫀
+                                            {% elif 'Psychology' in entry.primary_agent %}
+                                                🧠
+                                            {% elif 'Pulmonology' in entry.primary_agent %}
+                                                🫁
+                                            {% else %}
+                                                🩺
+                                            {% endif %}
+                                            Primary Analysis:
+                                        </h6>
+                                        <div class="bg-light p-3 rounded">
+                                            <div class="analysis-content">
+                                                {{ entry.primary_analysis | replace('\n', '<br>') | safe }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<!-- Empty State -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-clipboard-x text-muted" style="font-size: 4rem;"></i>
+                <h4 class="mt-3 text-muted">No Analysis History Yet</h4>
+                <p class="text-muted">Start by analyzing a medical report with our AI specialists!</p>
+                <a href="{{ url_for('analysis_page') }}" class="btn btn-primary">
+                    <i class="bi bi-clipboard2-pulse"></i> Analyze Medical Report
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+async function exportHistory() {
+    try {
+        const response = await fetch('/export_history');
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `medical_analysis_history_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } else {
+            alert('Failed to export history');
+        }
+    } catch (error) {
+        console.error('Export error:', error);
+        alert('Failed to export history');
+    }
+}
+
+async function clearHistory() {
+    if (confirm('Are you sure you want to clear all analysis history? This action cannot be undone.')) {
+        try {
+            const response = await fetch('/clear_history', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Failed to clear history');
+            }
+        } catch (error) {
+            console.error('Clear history error:', error);
+            alert('Failed to clear history');
+        }
+    }
+}
+</script>
+{% endblock %}

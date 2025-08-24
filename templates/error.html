@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Error - AI Medical Diagnostics{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-exclamation-triangle"></i> Oops! Something went wrong
+                </h4>
+            </div>
+            <div class="card-body text-center py-5">
+                <i class="bi bi-exclamation-triangle text-danger" style="font-size: 4rem;"></i>
+                
+                <h3 class="mt-4 text-danger">Error Occurred</h3>
+                
+                <p class="lead text-muted mt-3">
+                    {{ error_message or "An unexpected error has occurred. Please try again." }}
+                </p>
+                
+                <div class="mt-4">
+                    <a href="{{ url_for('home') }}" class="btn btn-primary me-2">
+                        <i class="bi bi-house"></i> Go Home
+                    </a>
+                    <button onclick="history.back()" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Go Back
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Troubleshooting Tips -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-tools"></i> Troubleshooting Tips
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="mb-0">
+                    <li><strong>API Configuration:</strong> Make sure your Gemini API key is properly configured in the .env file</li>
+                    <li><strong>Network Connection:</strong> Check your internet connection and try again</li>
+                    <li><strong>Browser Issues:</strong> Try refreshing the page or clearing your browser cache</li>
+                    <li><strong>Input Validation:</strong> Ensure all required fields are filled out correctly</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Contact Support -->
+        <div class="card mt-4 border-info">
+            <div class="card-body">
+                <h6 class="text-info">
+                    <i class="bi bi-info-circle"></i> Need Help?
+                </h6>
+                <p class="small mb-0">
+                    If the problem persists, please check the console logs for more detailed error information, 
+                    or verify your system configuration.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,529 @@
+{% extends "base.html" %}
+
+{% block title %}Multi-Agent Analysis - AI Medical Diagnostics{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="bi bi-clipboard2-pulse"></i> Multi-Agent Medical Report Analysis
+        </h1>
+        <p class="lead text-muted">Our AI specialists will analyze your report and route it to the most appropriate medical expert</p>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Input Form -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-file-earmark-text"></i> Medical Report Input</h5>
+            </div>
+            <div class="card-body">
+                <form id="analysisForm" enctype="multipart/form-data">
+                    <!-- File Upload Section -->
+                    <div class="mb-4">
+                        <label class="form-label">Medical Report *</label>
+                        
+                        <!-- Upload Option -->
+                        <div class="upload-section border-2 border-dashed rounded p-4 text-center mb-3" id="uploadSection">
+                            <div class="upload-icon mb-2">
+                                <i class="bi bi-cloud-upload display-4 text-muted"></i>
+                            </div>
+                            <h6>Upload Medical Report</h6>
+                            <p class="text-muted small mb-3">Support for PDF and TXT files (max 16MB)</p>
+                            
+                            <input type="file" class="d-none" id="reportFile" name="report_file" accept=".pdf,.txt">
+                            <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('reportFile').click()">
+                                <i class="bi bi-folder-plus"></i> Choose File
+                            </button>
+                            
+                            <div id="fileInfo" class="mt-3 d-none">
+                                <div class="alert alert-info">
+                                    <i class="bi bi-file-earmark-check"></i>
+                                    <strong>Selected:</strong> <span id="fileName"></span>
+                                    <span class="badge bg-secondary ms-2" id="fileSize"></span>
+                                    <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="clearFile()">
+                                        <i class="bi bi-x"></i> Remove
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- OR divider -->
+                        <div class="text-center mb-3">
+                            <span class="badge bg-light text-dark">OR</span>
+                        </div>
+                        
+                        <!-- Manual Text Input Option -->
+                        <div class="manual-input-section">
+                            <label for="reportText" class="form-label">Enter Text Manually</label>
+                            <textarea 
+                                class="form-control" 
+                                id="reportText" 
+                                name="report_text"
+                                rows="6" 
+                                placeholder="Enter your medical report text, lab results, or diagnostic findings here..."
+                            ></textarea>
+                            <div class="form-text">You can either upload a file above OR paste text here manually</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="symptoms" class="form-label">Current Symptoms</label>
+                        <textarea 
+                            class="form-control" 
+                            id="symptoms" 
+                            rows="3" 
+                            placeholder="Describe any current symptoms you're experiencing..."
+                        ></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="medicalHistory" class="form-label">Medical History</label>
+                        <textarea 
+                            class="form-control" 
+                            id="medicalHistory" 
+                            rows="3" 
+                            placeholder="Relevant medical history, medications, allergies..."
+                        ></textarea>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg" id="analyzeBtn">
+                            <i class="bi bi-robot"></i> Analyze with AI Specialists
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="clearSavedData()">
+                            <i class="bi bi-trash"></i> Clear Saved Medical History
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Info -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Analysis Information</h5>
+            </div>
+            <div class="card-body">
+                <h6>How It Works:</h6>
+                <ol class="small">
+                    <li><strong>Content Analysis:</strong> AI scans your report for medical keywords</li>
+                    <li><strong>Agent Selection:</strong> Routes to the most relevant specialist</li>
+                    <li><strong>Expert Analysis:</strong> Specialized agent provides targeted insights</li>
+                    <li><strong>Secondary Opinions:</strong> Other relevant specialists may provide additional perspectives</li>
+                </ol>
+                
+                <hr>
+                
+                <h6>💾 Auto-Save Feature:</h6>
+                <p class="small text-muted">Your symptoms and medical history are automatically saved as you type, so you don't lose your information when navigating the site.</p>
+                
+                <hr>
+                
+                <h6>Available Specialists:</h6>
+                <ul class="list-unstyled small">
+                    <li><span class="fs-4">🫀</span> Cardiologist Agent</li>
+                    <li><span class="fs-4">🧠</span> Psychology Agent</li>
+                    <li><span class="fs-4">🫁</span> Pulmonology Agent</li>
+                    <li><span class="fs-4">🩺</span> General Medicine Agent</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-body">
+                <h6 class="text-warning">
+                    <i class="bi bi-exclamation-triangle"></i> Important Notice
+                </h6>
+                <p class="small mb-0">
+                    This analysis is for educational purposes only. Always consult with qualified healthcare professionals for medical decisions.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Indicator -->
+<div id="loadingIndicator" class="row mt-4" style="display: none;">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3 mb-0">
+                    <i class="bi bi-robot"></i> Routing to appropriate medical specialists...
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Analysis Results -->
+<div id="resultsContainer" class="row mt-4" style="display: none;">
+    <!-- Agent Routing Info -->
+    <div class="col-12">
+        <div class="card border-success">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-compass"></i> AI Agent Routing</h5>
+            </div>
+            <div class="card-body">
+                <div class="row" id="routingInfo">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Primary Analysis -->
+    <div class="col-12 mt-3">
+        <div class="card border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0" id="primaryAgentHeader">
+                    <i class="bi bi-robot"></i> Primary Analysis
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="primaryAnalysis">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Secondary Analyses -->
+    <div class="col-12 mt-3" id="secondaryContainer" style="display: none;">
+        <div class="card border-info">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-search"></i> Additional Specialist Insights
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="accordion" id="secondaryAccordion">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error Container -->
+<div id="errorContainer" class="row mt-4" style="display: none;">
+    <div class="col-12">
+        <div class="alert alert-danger" role="alert">
+            <h5 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> Analysis Error</h5>
+            <p id="errorMessage"></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_styles %}
+<style>
+.upload-section {
+    background-color: #f8f9fa;
+    border-color: #dee2e6 !important;
+    transition: all 0.3s ease;
+}
+
+.upload-section:hover {
+    background-color: #e9ecef;
+    border-color: #007bff !important;
+}
+
+.upload-section.dragover {
+    background-color: #e7f3ff;
+    border-color: #007bff !important;
+    transform: scale(1.02);
+}
+
+.manual-input-section {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.375rem;
+    border: 1px solid #dee2e6;
+}
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Load saved form data on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadFormData();
+    
+    // Setup file upload handling
+    setupFileUpload();
+});
+
+// Setup file upload functionality
+function setupFileUpload() {
+    const fileInput = document.getElementById('reportFile');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            // Validate file type
+            const allowedTypes = ['application/pdf', 'text/plain'];
+            const fileExtension = file.name.split('.').pop().toLowerCase();
+            
+            if (!allowedTypes.includes(file.type) && !['pdf', 'txt'].includes(fileExtension)) {
+                alert('Please select a PDF or TXT file only.');
+                clearFile();
+                return;
+            }
+            
+            // Validate file size (16MB)
+            if (file.size > 16 * 1024 * 1024) {
+                alert('File size must be less than 16MB.');
+                clearFile();
+                return;
+            }
+            
+            // Show file info
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            fileInfo.classList.remove('d-none');
+            
+            // Clear manual text input when file is selected
+            document.getElementById('reportText').value = '';
+        }
+    });
+}
+
+function clearFile() {
+    document.getElementById('reportFile').value = '';
+    document.getElementById('fileInfo').classList.add('d-none');
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Save form data to localStorage
+function saveFormData() {
+    const formData = {
+        symptoms: document.getElementById('symptoms').value,
+        medicalHistory: document.getElementById('medicalHistory').value
+    };
+    localStorage.setItem('medicalFormData', JSON.stringify(formData));
+}
+
+// Load form data from localStorage
+function loadFormData() {
+    const savedData = localStorage.getItem('medicalFormData');
+    if (savedData) {
+        try {
+            const formData = JSON.parse(savedData);
+            if (formData.symptoms) {
+                document.getElementById('symptoms').value = formData.symptoms;
+            }
+            if (formData.medicalHistory) {
+                document.getElementById('medicalHistory').value = formData.medicalHistory;
+            }
+        } catch (e) {
+            console.error('Error loading saved form data:', e);
+        }
+    }
+}
+
+// Auto-save form data when user types
+document.getElementById('symptoms').addEventListener('input', saveFormData);
+document.getElementById('medicalHistory').addEventListener('input', saveFormData);
+
+document.getElementById('analysisForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const reportText = document.getElementById('reportText').value.trim();
+    const symptoms = document.getElementById('symptoms').value.trim();
+    const medicalHistory = document.getElementById('medicalHistory').value.trim();
+    const fileInput = document.getElementById('reportFile');
+    const hasFile = fileInput.files.length > 0;
+    
+    // Validate input - either file or manual text required
+    if (!hasFile && !reportText) {
+        alert('Please either upload a medical report file or enter text manually.');
+        return;
+    }
+    
+    // Save form data before analysis
+    saveFormData();
+    
+    // Show loading
+    document.getElementById('loadingIndicator').style.display = 'block';
+    document.getElementById('resultsContainer').style.display = 'none';
+    document.getElementById('errorContainer').style.display = 'none';
+    document.getElementById('analyzeBtn').disabled = true;
+    
+    try {
+        let response;
+        
+        if (hasFile) {
+            // File upload - use FormData
+            const formData = new FormData();
+            formData.append('report_file', fileInput.files[0]);
+            formData.append('symptoms', symptoms);
+            formData.append('medical_history', medicalHistory);
+            
+            response = await fetch('/analyze', {
+                method: 'POST',
+                body: formData
+            });
+        } else {
+            // Manual text - use JSON
+            response = await fetch('/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    report_text: reportText,
+                    symptoms: symptoms,
+                    medical_history: medicalHistory
+                })
+            });
+        }
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error || 'Analysis failed');
+        }
+        
+        displayResults(data);
+        
+    } catch (error) {
+        console.error('Analysis error:', error);
+        document.getElementById('errorMessage').textContent = error.message;
+        document.getElementById('errorContainer').style.display = 'block';
+    } finally {
+        document.getElementById('loadingIndicator').style.display = 'none';
+        document.getElementById('analyzeBtn').disabled = false;
+    }
+});
+
+function displayResults(data) {
+    // Display file info if uploaded
+    let fileInfoHtml = '';
+    if (data.file_info) {
+        fileInfoHtml = `
+            <div class="col-12 mb-3">
+                <div class="alert alert-info">
+                    <i class="bi bi-file-earmark-check"></i>
+                    <strong>Analyzed File:</strong> ${data.file_info.filename} 
+                    <span class="badge bg-secondary ms-2">${data.file_info.type.toUpperCase()}</span>
+                    <span class="badge bg-secondary ms-1">${formatFileSize(data.file_info.size)}</span>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Display routing information
+    const routingInfo = document.getElementById('routingInfo');
+    routingInfo.innerHTML = `
+        ${fileInfoHtml}
+        <div class="col-md-8">
+            <h6><strong>Primary Specialist:</strong> ${data.primary_agent.icon} ${data.primary_agent.name}</h6>
+            <div class="progress">
+                <div class="progress-bar" role="progressbar" style="width: ${data.primary_agent.confidence * 100}%">
+                    ${Math.round(data.primary_agent.confidence * 100)}% Confidence
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <h6><strong>Routing Score:</strong></h6>
+            <span class="badge bg-success fs-6">${Math.round(data.primary_agent.confidence * 100)}%</span>
+        </div>
+    `;
+    
+    if (data.secondary_agents.length > 0) {
+        routingInfo.innerHTML += `
+            <div class="col-12 mt-3">
+                <h6><strong>Additional Consultations:</strong></h6>
+                ${data.secondary_agents.map(agent => 
+                    `<span class="badge bg-secondary me-2">${agent.icon} ${agent.name} (${Math.round(agent.confidence * 100)}%)</span>`
+                ).join('')}
+            </div>
+        `;
+    }
+    
+    // Display primary analysis
+    document.getElementById('primaryAgentHeader').innerHTML = 
+        `${data.primary_agent.icon} Primary Analysis - ${data.primary_agent.name}`;
+    document.getElementById('primaryAnalysis').innerHTML = 
+        `<div class="analysis-content">${data.primary_agent.analysis.replace(/\n/g, '<br>')}</div>`;
+    
+    // Display secondary analyses
+    if (data.secondary_agents.length > 0) {
+        const secondaryAccordion = document.getElementById('secondaryAccordion');
+        secondaryAccordion.innerHTML = data.secondary_agents.map((agent, index) => `
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading${index}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                            data-bs-target="#collapse${index}">
+                        ${agent.icon} ${agent.name} Perspective (${Math.round(agent.confidence * 100)}% relevance)
+                    </button>
+                </h2>
+                <div id="collapse${index}" class="accordion-collapse collapse" 
+                     data-bs-parent="#secondaryAccordion">
+                    <div class="accordion-body">
+                        ${agent.analysis.replace(/\n/g, '<br>')}
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        
+        document.getElementById('secondaryContainer').style.display = 'block';
+    } else {
+        document.getElementById('secondaryContainer').style.display = 'none';
+    }
+    
+    // Show results
+    document.getElementById('resultsContainer').style.display = 'block';
+    
+    // Scroll to results
+    document.getElementById('resultsContainer').scrollIntoView({ 
+        behavior: 'smooth' 
+    });
+}
+
+// Clear saved medical data
+function clearSavedData() {
+    if (confirm('Are you sure you want to clear your saved medical history and symptoms? This will remove all saved form data.')) {
+        localStorage.removeItem('medicalFormData');
+        document.getElementById('symptoms').value = '';
+        document.getElementById('medicalHistory').value = '';
+        
+        // Show success message
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-success alert-dismissible fade show mt-3';
+        alertDiv.innerHTML = `
+            <i class="bi bi-check-circle"></i> Saved medical history cleared successfully!
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        const form = document.getElementById('analysisForm');
+        form.parentNode.insertBefore(alertDiv, form);
+        
+        // Auto-dismiss after 3 seconds
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 3000);
+    }
+}
+</script>
+{% endblock %}

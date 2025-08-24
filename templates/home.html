@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Multi-Agent AI Medical Diagnostics{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="text-center mb-5">
+            <div class="py-4">
+                <h1 class="display-4 fw-bold mb-3 text-primary">
+                    <i class="bi bi-stethoscope me-2"></i>
+                    Medical AI Diagnostics
+                </h1>
+                <p class="lead text-muted mb-4">AI-powered medical analysis with specialized diagnostic agents</p>
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <span class="badge text-bg-primary px-3 py-2">AI Analysis</span>
+                    <span class="badge text-bg-success px-3 py-2">Multi-Agent</span>
+                    <span class="badge text-bg-info px-3 py-2">Fast Results</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Status -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-activity"></i> System Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <div class="d-flex flex-column align-items-center">
+                            {% if system_status.gemini_configured %}
+                                <i class="bi bi-check-circle-fill text-success fs-1"></i>
+                                <h6 class="text-success">Gemini AI Ready</h6>
+                            {% else %}
+                                <i class="bi bi-x-circle-fill text-danger fs-1"></i>
+                                <h6 class="text-danger">API Not Configured</h6>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-flex flex-column align-items-center">
+                            {% if system_status.agents_ready %}
+                                <i class="bi bi-robot text-primary fs-1"></i>
+                                <h6 class="text-primary">4 Agents Active</h6>
+                            {% else %}
+                                <i class="bi bi-robot text-secondary fs-1"></i>
+                                <h6 class="text-secondary">Agents Offline</h6>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-flex flex-column align-items-center">
+                            <i class="bi bi-clipboard-data text-info fs-1"></i>
+                            <h6 class="text-info">{{ system_status.total_analyses }} Analyses</h6>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-flex flex-column align-items-center">
+                            <i class="bi bi-chat-dots text-warning fs-1"></i>
+                            <h6 class="text-warning">{{ system_status.chat_sessions }} Chat Messages</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- AI Medical Specialists -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="text-center mb-4">
+            <h2 class="h3 fw-bold mb-3 text-primary">
+                <i class="bi bi-people me-2"></i>Our Medical Specialists
+            </h2>
+            <p class="text-muted">AI agents specialized in different medical domains</p>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-5 g-4">
+    {% for agent in agents_info %}
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100 agent-card" data-agent="{{ agent.key }}">
+            <div class="card-body text-center p-4">
+                <div class="agent-icon">
+                    {{ agent.icon }}
+                </div>
+                <h5 class="fw-bold mb-2">{{ agent.name }}</h5>
+                <p class="text-muted small mb-3">{{ agent.description }}</p>
+                <div class="agent-status">
+                    {% if system_status.agents_ready %}
+                        <span class="badge text-bg-success">
+                            <i class="bi bi-check-circle"></i> Active
+                        </span>
+                    {% else %}
+                        <span class="badge text-bg-secondary">
+                            <i class="bi bi-pause-circle"></i> Offline
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- How It Works -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0"><i class="bi bi-info-circle"></i> How It Works</h4>
+            </div>
+            <div class="card-body p-5">
+                <div class="row g-4">
+                    <div class="col-md-3 text-center">
+                        <div class="position-relative mb-4">
+                            <div class="step-icon bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px; font-size: 2rem;">
+                                <i class="bi bi-cloud-upload"></i>
+                            </div>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">1</span>
+                        </div>
+                        <h5 class="fw-bold text-primary">Upload Report</h5>
+                        <p class="text-muted">Upload PDF/TXT files or paste your medical report text</p>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="position-relative mb-4">
+                            <div class="step-icon bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px; font-size: 2rem;">
+                                <i class="bi bi-compass"></i>
+                            </div>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success">2</span>
+                        </div>
+                        <h5 class="fw-bold text-success">Smart Routing</h5>
+                        <p class="text-muted">AI analyzes content and routes to the best specialist</p>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="position-relative mb-4">
+                            <div class="step-icon bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px; font-size: 2rem;">
+                                <i class="bi bi-robot"></i>
+                            </div>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning">3</span>
+                        </div>
+                        <h5 class="fw-bold text-warning">Expert Analysis</h5>
+                        <p class="text-muted">Specialized agents provide targeted medical insights</p>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="position-relative mb-4">
+                            <div class="step-icon bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px; font-size: 2rem;">
+                                <i class="bi bi-bar-chart"></i>
+                            </div>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-info">4</span>
+                        </div>
+                        <h5 class="fw-bold text-info">Multi-Perspective</h5>
+                        <p class="text-muted">Get comprehensive opinions from multiple specialists</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="text-center mb-4">
+            <h2 class="h3 fw-bold mb-3 text-primary">
+                <i class="bi bi-play-circle me-2"></i>Get Started
+            </h2>
+            <p class="text-muted">Choose how you want to use our medical AI system</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="bi bi-file-text display-4 text-primary"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">Analyze Medical Report</h5>
+                        <p class="text-muted mb-4">Upload files or paste your medical reports for AI analysis</p>
+                        <a href="{{ url_for('analysis_page') }}" class="btn btn-primary w-100">
+                            <i class="bi bi-clipboard2-pulse me-2"></i>Start Analysis
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="bi bi-chat-dots display-4 text-success"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">Ask Medical Questions</h5>
+                        <p class="text-muted mb-4">Chat with our AI medical assistant for health questions</p>
+                        <a href="{{ url_for('chat_page') }}" class="btn btn-success w-100">
+                            <i class="bi bi-chat-dots me-2"></i>Start Chat
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="bi bi-clock-history display-4 text-info"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">View Analysis History</h5>
+                        <p class="text-muted mb-4">Review your previous medical analyses and insights</p>
+                        <a href="{{ url_for('history_page') }}" class="btn btn-info w-100">
+                            <i class="bi bi-clock-history me-2"></i>View History
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if not system_status.gemini_configured %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="alert alert-warning" role="alert">
+            <h5 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> Setup Required</h5>
+            <p>To use the AI medical specialists, please add your Gemini API key to the <code>.env</code> file:</p>
+            <hr>
+            <p class="mb-0">
+                <strong>GEMINI_API_KEY=</strong>your_actual_api_key_here<br>
+                <small class="text-muted">Get your API key from <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a></small>
+            </p>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Simple interactions
+document.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-2px)';
+        this.style.transition = 'transform 0.2s ease';
+    });
+    
+    card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0)';
+    });
+});
+</script>
+{% endblock %}

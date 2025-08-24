@@ -1,0 +1,394 @@
+{% extends "base.html" %}
+
+{% block title %}Medical Chat - AI Medical Diagnostics{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="bi bi-chat-dots"></i> AI Medical Chat Assistant
+        </h1>
+        <p class="lead text-muted">Ask questions and get educational information from our AI medical specialists</p>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Chat Interface -->
+    <div class="col-lg-8">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-robot"></i> Medical Chat</h5>
+                <button class="btn btn-outline-secondary btn-sm" onclick="clearChat()">
+                    <i class="bi bi-trash"></i> Clear Chat
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <!-- Chat Messages -->
+                <div id="chatMessages" class="chat-container">
+                    {% if chat_history %}
+                        {% for message in chat_history %}
+                            {% if message.role == 'user' %}
+                                <div class="message user-message">
+                                    <div class="message-content">
+                                        <strong><i class="bi bi-person"></i> You:</strong><br>
+                                        {{ message.content }}
+                                    </div>
+                                    <div class="message-time">
+                                        {{ message.timestamp }}
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="message ai-message">
+                                    <div class="message-content">
+                                        <strong><i class="bi bi-robot"></i> AI Medical Assistant:</strong><br>
+                                        {{ message.content|replace('\n', '<br>')|safe }}
+                                    </div>
+                                    <div class="message-time">
+                                        {{ message.timestamp }}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-chat">
+                            <div class="text-center text-muted p-4">
+                                <i class="bi bi-chat-dots fs-1"></i>
+                                <p class="mt-3">Start a conversation with our AI medical assistant!</p>
+                                <p class="small">Ask about symptoms, conditions, or general health topics.</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Chat Input -->
+                <div class="chat-input-container">
+                    <form id="chatForm" class="d-flex">
+                        <input 
+                            type="text" 
+                            id="messageInput" 
+                            class="form-control" 
+                            placeholder="Ask about symptoms, conditions, or health concerns..."
+                            required
+                        >
+                        <button type="submit" class="btn btn-primary ms-2" id="sendBtn">
+                            <i class="bi bi-send"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <!-- Quick Questions -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-lightning"></i> Quick Questions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary btn-sm" onclick="askQuestion('Tell me about fever symptoms and when to seek medical attention')">
+                        <i class="bi bi-thermometer"></i> About Fever
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm" onclick="askQuestion('What are signs of heart problems I should watch for?')">
+                        <i class="bi bi-heart"></i> Heart Health
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm" onclick="askQuestion('How can I recognize signs of depression or anxiety?')">
+                        <i class="bi bi-brain"></i> Mental Health
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm" onclick="askQuestion('What are common respiratory symptoms I should be concerned about?')">
+                        <i class="bi bi-lungs"></i> Respiratory Health
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Chat Guidelines -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Chat Guidelines</h5>
+            </div>
+            <div class="card-body">
+                <ul class="small mb-0">
+                    <li>Ask about general health topics and symptoms</li>
+                    <li>Request educational information about medical conditions</li>
+                    <li>Get guidance on when to seek professional care</li>
+                    <li>Learn about preventive health measures</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Medical Disclaimer -->
+        <div class="card border-warning">
+            <div class="card-body">
+                <h6 class="text-warning">
+                    <i class="bi bi-exclamation-triangle"></i> Important Notice
+                </h6>
+                <p class="small mb-0">
+                    This AI assistant provides educational information only and does not replace professional medical advice. 
+                    Always consult healthcare professionals for medical decisions.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Indicator -->
+<div id="typingIndicator" class="message ai-message" style="display: none;">
+    <div class="message-content">
+        <strong><i class="bi bi-robot"></i> AI Medical Assistant:</strong><br>
+        <div class="typing-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.getElementById('chatForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Prevent double submissions
+    if (window.isProcessing) return;
+    
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const message = messageInput.value.trim();
+    
+    if (!message) return;
+    
+    // Set processing state
+    window.isProcessing = true;
+    
+    // Clear input and disable send button
+    messageInput.value = '';
+    sendBtn.disabled = true;
+    sendBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Sending...';
+    
+    // Add user message to chat
+    addMessage('user', message);
+    
+    // Show typing indicator instead of simple text
+    showTypingIndicator();
+    
+    // Use XMLHttpRequest for better compatibility
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/send_message', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            // Hide typing indicator
+            hideTypingIndicator();
+            
+            if (xhr.status === 200) {
+                try {
+                    const data = JSON.parse(xhr.responseText);
+                    console.log('Response received:', data);
+                    addMessage('ai', data.ai_response);
+                } catch (parseError) {
+                    console.error('JSON Parse Error:', parseError);
+                    addMessage('ai', 'Sorry, there was an error processing your request. Please try again.');
+                }
+            } else {
+                console.error('HTTP Error:', xhr.status, xhr.statusText);
+                addMessage('ai', 'Sorry, there was an error connecting to the server. Please try again.');
+            }
+            
+            // Restore send button
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="bi bi-send"></i>';
+            messageInput.focus();
+            
+            // Reset processing state
+            window.isProcessing = false;
+        }
+    };
+    
+    xhr.onerror = function() {
+        console.error('Network error');
+        // Hide typing indicator
+        hideTypingIndicator();
+        
+        addMessage('ai', 'Network error. Please check your connection and try again.');
+        
+        // Restore send button
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = '<i class="bi bi-send"></i>';
+        messageInput.focus();
+        
+        // Reset processing state
+        window.isProcessing = false;
+    };
+    
+    xhr.send(JSON.stringify({ message: message }));
+});
+
+function addMessage(role, content) {
+    const chatMessages = document.getElementById('chatMessages');
+    
+    // Remove empty chat message if it exists
+    const emptyChat = chatMessages.querySelector('.empty-chat');
+    if (emptyChat) {
+        emptyChat.remove();
+    }
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${role}-message`;
+    
+    const now = new Date();
+    const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const dateString = now.toLocaleDateString();
+    
+    if (role === 'user') {
+        messageDiv.innerHTML = `
+            <div class="message-content">
+                <strong><i class="bi bi-person"></i> You:</strong><br>
+                ${escapeHtml(content)}
+            </div>
+            <div class="message-time">${dateString}, ${timeString}</div>
+        `;
+    } else {
+        messageDiv.innerHTML = `
+            <div class="message-content">
+                <strong><i class="bi bi-robot"></i> AI Medical Assistant:</strong><br>
+                ${content.replace(/\n/g, '<br>')}
+            </div>
+            <div class="message-time">${dateString}, ${timeString}</div>
+        `;
+    }
+    
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+    // Add animation
+    setTimeout(() => {
+        messageDiv.style.opacity = '1';
+        messageDiv.style.transform = 'translateY(0)';
+    }, 10);
+}
+
+// Helper function to escape HTML
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Typing indicator functions
+function showTypingIndicator() {
+    const chatMessages = document.getElementById('chatMessages');
+    
+    // Remove any existing typing indicators
+    hideTypingIndicator();
+    
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'message ai-message typing-indicator';
+    typingDiv.id = 'typingIndicator';
+    typingDiv.innerHTML = `
+        <div class="message-content">
+            <strong><i class="bi bi-robot"></i> AI Medical Assistant:</strong><br>
+            <div class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    `;
+    
+    chatMessages.appendChild(typingDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function hideTypingIndicator() {
+    const indicator = document.getElementById('typingIndicator');
+    if (indicator) {
+        indicator.remove();
+    }
+}
+
+function askQuestion(question) {
+    // Prevent asking question if already processing
+    if (window.isProcessing) return;
+    
+    document.getElementById('messageInput').value = question;
+    document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+}
+
+async function clearChat() {
+    if (confirm('Are you sure you want to clear the chat history?')) {
+        try {
+            const response = await fetch('/clear_chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Failed to clear chat history');
+            }
+        } catch (error) {
+            console.error('Error clearing chat:', error);
+            alert('Failed to clear chat history');
+        }
+    }
+}
+
+// Initialize global processing state
+window.isProcessing = false;
+
+// Ensure no processing indicators remain on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Remove any stray typing indicators
+    hideTypingIndicator();
+    
+    // Clear any stuck processing messages
+    clearStuckProcessingMessages();
+    
+    // Reset send button
+    const sendBtn = document.getElementById('sendBtn');
+    if (sendBtn) {
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = '<i class="bi bi-send"></i>';
+    }
+    
+    // Reset processing state
+    window.isProcessing = false;
+    
+    // Auto-focus on message input
+    const messageInput = document.getElementById('messageInput');
+    if (messageInput) {
+        messageInput.focus();
+    }
+    
+    // Add enter key handling for mobile
+    if (messageInput) {
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+            }
+        });
+    }
+});
+
+// Clear stuck processing messages
+function clearStuckProcessingMessages() {
+    const messages = document.querySelectorAll('.message.ai-message');
+    messages.forEach(msg => {
+        if (msg.textContent.includes('Processing your message') || 
+            msg.textContent.includes('Processing...') ||
+            msg.classList.contains('typing-indicator')) {
+            msg.remove();
+        }
+    });
+}
+</script>
+{% endblock %}

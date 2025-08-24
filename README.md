@@ -50,7 +50,7 @@ pip install -r requirements.txt
 
 ---
 
-## ▶Usage
+## Usage
 
 ### 1. Start Flask Backend
 ```bash

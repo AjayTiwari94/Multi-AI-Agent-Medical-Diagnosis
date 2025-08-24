@@ -1,0 +1,34 @@
+MEDICAL REPORT
+
+Patient: John Doe
+Date: January 15, 2024
+Doctor: Dr. Smith
+
+CHIEF COMPLAINT:
+Chest pain and shortness of breath for the past 2 days.
+
+HISTORY OF PRESENT ILLNESS:
+The patient reports onset of sharp chest pain 2 days ago, particularly when taking deep breaths. Associated with mild shortness of breath during exertion. No fever, cough, or leg swelling noted.
+
+PHYSICAL EXAMINATION:
+- Vital Signs: BP 140/90, HR 88 bpm, RR 18, O2 Sat 96% on room air
+- Heart: Regular rate and rhythm, no murmurs
+- Lungs: Clear to auscultation bilaterally
+- No peripheral edema
+
+DIAGNOSTIC TESTS:
+- ECG: Normal sinus rhythm, no ST changes
+- Chest X-ray: No acute cardiopulmonary abnormalities
+- D-dimer: Elevated at 1200 ng/mL (normal <500)
+
+ASSESSMENT:
+Possible pulmonary embolism given clinical presentation and elevated D-dimer.
+
+PLAN:
+1. CT pulmonary angiogram to rule out PE
+2. Start anticoagulation if PE confirmed
+3. Follow-up in 24 hours
+4. Return immediately if symptoms worsen
+
+Dr. Smith, MD
+Emergency Department

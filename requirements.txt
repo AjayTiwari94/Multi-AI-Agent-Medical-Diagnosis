@@ -1,0 +1,9 @@
+streamlit==1.32.0
+flask==3.0.0
+google-generativeai==0.4.0
+python-dotenv==1.0.0
+pandas==2.2.1
+plotly==5.19.0
+Pillow==10.0.1
+requests==2.31.0
+PyPDF2==3.0.1

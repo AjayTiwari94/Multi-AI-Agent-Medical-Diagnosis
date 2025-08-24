@@ -1,10 +1,14 @@
-# Multi-Agent AI Medical Diagnosis System
+# Multi-AI-Agent-Medical-Diagnosis-System
 
 ## Overview
 The **Multi-Agent AI Medical Diagnosis System** is designed to assist in medical imaging diagnosis using deep learning and computer vision.  
 This project integrates multiple AI agents to analyze, classify, and provide insights into medical images while maintaining a modular backend and interactive frontend.
 
 ---
+
+## Live Demo
+Try the live web application here : 
+[Multi AI Agent Medical Diagnosis - Hugging Face Space](https://huggingface.co/spaces/AjayTiwari94/Multi-AI-Agent-Medical-Diagnosis)
 
 ## Features
 - Multi-agent system for medical diagnosis  
@@ -75,8 +79,7 @@ streamlit run app.py
 
 ## Credits
 - **Frontend (Streamlit):** Developed by Ajay Tiwari  
-- **Backend (Flask):** Special thanks to my teammate for backend integration  
-- **Deployment:** Hugging Face Spaces & Vercel  
+- **Backend (Flask):** Special thanks to my teammate Siddharth Mishra for backend integration  
 
 ---
 

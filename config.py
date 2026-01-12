@@ -19,9 +19,9 @@ class Config:
     APP_ICON = "🩺"
     
     # Model Configuration
-    GEMINI_MODEL = "gemini-1.5-flash"  # Switched to Flash for higher quotas
-    GEMINI_MODEL_FAST = "gemini-1.5-flash"  # Faster model with lower quota usage
-    GEMINI_MODEL_PRO = "gemini-1.5-pro"  # Best quality but higher quota usage
+    GEMINI_MODEL = "gemini-2.0-flash"  # Switched to Flash for higher quotas
+    GEMINI_MODEL_FAST = "gemini-2.0-flash"  # Faster model with lower quota usage
+    GEMINI_MODEL_PRO = "gemini-2.0-pro"  # Best quality but higher quota usage
     
     # UI Configuration
     SIDEBAR_STATE = "expanded"
